@@ -454,9 +454,9 @@ def FBProphet(manual, df_t,test_size_manual, horizon):
 
     fig_tuned = go.Figure()
     fig_tuned.add_trace(go.Scatter(x=ticks, y=dg["y"], mode='markers', name='observations', marker=dict(color='black')))
-    fig_tuned.add_trace(go.Scatter(x=ticks, y=pred["yhat"], mode='lines', name='predictions'))
-    fig_tuned.add_trace(go.Scatter(x=ticks, y=pred["yhat_upper"], fill=None, mode='lines', line_color='lightgrey', showlegend=False))
-    fig_tuned.add_trace(go.Scatter(x=ticks, y=pred["yhat_lower"], fill='tonexty', mode='lines', line_color='lightgrey', showlegend=False))
+    fig_tuned.add_trace(go.Scatter(x=ticks, y=pred["yhat"].apply(lambda y: np.maximum(0,y)), mode='lines', name='predictions'))
+    fig_tuned.add_trace(go.Scatter(x=ticks, y=pred["yhat_upper"].apply(lambda y: np.maximum(0,y)), fill=None, mode='lines', line_color='lightgrey', showlegend=False))
+    fig_tuned.add_trace(go.Scatter(x=ticks, y=pred["yhat_lower"].apply(lambda y: np.maximum(0,y)), fill='tonexty', mode='lines', line_color='lightgrey', showlegend=False))
     fig_tuned.add_vline(x=ticks[train_size], line=dict(dash='dash', color='black'), name='split')
 
     fig_tuned.update_layout(
@@ -601,7 +601,9 @@ def FBProphet(manual, df_t,test_size_manual, horizon):
     
     
     st.plotly_chart(fig_final)
-    df_final = pd.DataFrame({"Date": ticks, "Yhat":pred["yhat"].apply(lambda y: np.maximum(0,y)), "Yhat_upper":pred["yhat_upper"], "Yhat_lower": pred["yhat_lower"]})
+    df_final = pd.DataFrame({"Date": ticks, "Yhat":pred["yhat"].apply(lambda y: np.maximum(0,y)),
+                             "Yhat_upper":pred["yhat_upper"].apply(lambda y: np.maximum(0,y)), 
+                             "Yhat_lower": pred["yhat_lower"].apply(lambda y: np.maximum(0,y))})
 
 
     csv = convert_df(df_final)

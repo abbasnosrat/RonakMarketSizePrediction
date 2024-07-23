@@ -58,7 +58,7 @@ if got_data:
     df_t = df.query(f"GenericName == '{product}'").reset_index(drop=True)
     
    
-    pack_check = st.checkbox("display in packs", help="displays outputs in ronak's pack")
+    pack_check = st.sidebar.checkbox("display in packs", help="displays outputs in ronak's pack")
     if pack_check:
         pack_map_t = pack_map.query(f"GenericName == '{product}'")
         if len(pack_map_t)>0:
