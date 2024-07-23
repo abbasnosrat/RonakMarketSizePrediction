@@ -50,11 +50,17 @@ except:
         got_data = False
 
 if got_data:
+    pack_map = df[["GenericName", "CompanyName", "num_in_pack"]].query("CompanyName == 'روناک'").drop_duplicates(ignore_index=True)
     df = df[["GenericName", "CompanyName", "Year", "Month","QtyAdadi"]]
     products = list(df.GenericName.unique())
     product = st.sidebar.selectbox(label="Please select a Generic", options=products,
                                     help="Select the product you want the model to predict. Keep in mind that the model cannot be trained on a product with low data.")
     df_t = df.query(f"GenericName == '{product}'").reset_index(drop=True)
+    pack_map_t = pack_map.query(f"GenericName == '{product}'")
+    if len(pack_map_t)>0:
+        pack = pack_map_t.reset_index(drop=True).iloc[0,-1]
+        df_t["QtyAdadi"] = df_t["QtyAdadi"]/pack
+        st.write(f"ronak's num in pack = {pack}")
     company_level = st.sidebar.checkbox("Single Company", help="check this box if you want to select a company")
     if company_level:
         companies = list(df_t.CompanyName.unique())

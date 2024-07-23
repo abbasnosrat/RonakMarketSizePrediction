@@ -167,6 +167,7 @@ def XGB(manual, df_t, train_size, horizon):
     model = XGBRegressor()
     model.fit(X_train, y_train)
     pred = model.predict(X)
+    pred = np.maximum(0,pred)
     ticks = make_ticks(X[:,0], X[:,1])
     fig_tuned = go.Figure()
     fig_tuned.add_trace(go.Scatter(x=ticks, y=y, mode='markers', name='observations', marker=dict(color='black')))
@@ -246,6 +247,7 @@ def XGB(manual, df_t, train_size, horizon):
     model = XGBRegressor()
     model.fit(X, y)
     Xs, preds = ar_prediction(model, X[-1], horizon)
+    preds = np.maximum(0, preds)
     ticks = make_ticks(Xs[:,0], Xs[:,1])
     fig_ar = go.Figure()
     fig_ar.add_trace(go.Scatter(x=ticks, y=preds, mode='lines', name='predictions'))
@@ -308,6 +310,7 @@ def XGB(manual, df_t, train_size, horizon):
     st.plotly_chart(fig_ar)
     # plt.figure()
     df_pred = pd.DataFrame({"Date":ticks, "Yhat":preds})
+    
     csv = convert_df(df_pred)
     st.download_button(
     "Download Results",
@@ -534,9 +537,9 @@ def FBProphet(manual, df_t,test_size_manual, horizon):
     pred = model.predict(future)
     fig_final = go.Figure()
     ticks = pred["ds"].apply(to_jalali)
-    fig_final.add_trace(go.Scatter(x=ticks, y=pred["yhat"], mode='lines', name='predictions'))
-    fig_final.add_trace(go.Scatter(x=ticks, y=pred["yhat_upper"], fill=None, mode='lines', line_color='lightgrey', showlegend=False))
-    fig_final.add_trace(go.Scatter(x=ticks, y=pred["yhat_lower"], fill='tonexty', mode='lines', line_color='lightgrey', showlegend=False))
+    fig_final.add_trace(go.Scatter(x=ticks, y=pred["yhat"].apply(lambda y: np.maximum(0,y)), mode='lines', name='predictions'))
+    fig_final.add_trace(go.Scatter(x=ticks, y=pred["yhat_upper"].apply(lambda y: np.maximum(0,y)), fill=None, mode='lines', line_color='lightgrey', showlegend=False))
+    fig_final.add_trace(go.Scatter(x=ticks, y=pred["yhat_lower"].apply(lambda y: np.maximum(0,y)), fill='tonexty', mode='lines', line_color='lightgrey', showlegend=False))
     fig_final.update_layout(title=f'Predictions for {horizon} months', xaxis_title='Date', yaxis_title='Sales Amount')
     
     st.markdown("""
@@ -598,7 +601,7 @@ def FBProphet(manual, df_t,test_size_manual, horizon):
     
     
     st.plotly_chart(fig_final)
-    df_final = pd.DataFrame({"Date": ticks, "Yhat":pred["yhat"], "Yhat_upper":pred["yhat_upper"], "Yhat_lower": pred["yhat_lower"]})
+    df_final = pd.DataFrame({"Date": ticks, "Yhat":pred["yhat"].apply(lambda y: np.maximum(0,y)), "Yhat_upper":pred["yhat_upper"], "Yhat_lower": pred["yhat_lower"]})
 
 
     csv = convert_df(df_final)
