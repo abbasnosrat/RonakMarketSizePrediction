@@ -56,11 +56,15 @@ if got_data:
     product = st.sidebar.selectbox(label="Please select a Generic", options=products,
                                     help="Select the product you want the model to predict. Keep in mind that the model cannot be trained on a product with low data.")
     df_t = df.query(f"GenericName == '{product}'").reset_index(drop=True)
-    pack_map_t = pack_map.query(f"GenericName == '{product}'")
-    if len(pack_map_t)>0:
-        pack = pack_map_t.reset_index(drop=True).iloc[0,-1]
-        df_t["QtyAdadi"] = df_t["QtyAdadi"]/pack
-        st.write(f"ronak's num in pack = {pack}")
+    
+   
+    pack_check = st.checkbox("display in packs", help="displays outputs in ronak's pack")
+    if pack_check:
+        pack_map_t = pack_map.query(f"GenericName == '{product}'")
+        if len(pack_map_t)>0:
+            pack = pack_map_t.reset_index(drop=True).iloc[0,-1]
+            df_t["QtyAdadi"] = df_t["QtyAdadi"]/pack
+            st.write(f"ronak's num in pack = {pack}")
     company_level = st.sidebar.checkbox("Single Company", help="check this box if you want to select a company")
     if company_level:
         companies = list(df_t.CompanyName.unique())
