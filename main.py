@@ -34,17 +34,17 @@ st.write("""
          Hover your curser on the ? if you want information on each component
          """)
 st.sidebar.write("Controls")
-file = st.sidebar.file_uploader("Upload Your Dataset", type=".xlsx",help="You can upload the data you want the model to be trained on")
+file = st.sidebar.file_uploader("Upload Your Dataset", type=".csv",help="You can upload the data you want the model to be trained on")
 use_sample_data = st.sidebar.checkbox("Use Sample Data",
                                       help="Check this if you do not want to upload a dataset and want to upload data and the model will be trained on the sample dataset")
 
 # df = pd.read_csv("SalesData.csv") if file is None else pd.read_csv(file)
 try:
-    df = pd.read_excel(file)
+    df = pd.read_csv(file)
     got_data = True
 except:
     if use_sample_data:
-        df = pd.read_excel("./stat.xlsx") 
+        df = pd.read_csv("./stat.csv") 
         got_data = True
     else:
         got_data = False
