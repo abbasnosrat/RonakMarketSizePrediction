@@ -117,7 +117,9 @@ def ar_prediction(model:XGBRegressor, X_init:np.ndarray, horizon:int):
 
 
 
-def XGB(manual, df_t, train_size, horizon):
+def XGB(manual, df_t, train_size, horizon, helps):
+    
+
     if not manual:
         mses = []
         models = []
@@ -135,7 +137,7 @@ def XGB(manual, df_t, train_size, horizon):
         n_lags_manual=float(st.sidebar.number_input(label="Select Number of lags", value=1,
                                                 min_value=0,
                                                 max_value=1000,
-                                                help="This input selects the number of lags used for prediction. Lag is the number of months in the past that the model uses for future prediction."))
+                                                help=helps.loc["Select Number of lags"].Description))
     
         best = {"n_lags": n_lags_manual}
         # model, mse = train_booster(df_t, {"n_lags": n_lags_manual}, train_size)
@@ -224,13 +226,13 @@ def XGB(manual, df_t, train_size, horizon):
             opacity: 1;
         }
         </style>
-        <div class="chart-container">
+       
+    """ + f""" <div class="chart-container">
             <div class="tooltip">
                 <span class="help-icon">❓</span>
-                <span class="tooltiptext">The figure depicts the one-step-ahead predictions of the model. In OSA prediction, the model uses the real data for predicing one month into the future.</span>
+                <span class="tooltiptext">{helps.loc['One Step Ahead Prediction'].Description}</span>
             </div>
-        </div>
-    """, unsafe_allow_html=True)    
+        </div>""", unsafe_allow_html=True)    
     
     st.plotly_chart(fig_tuned)
     # plt.plot(ticks,y, ".k", label="observations")
@@ -300,13 +302,13 @@ def XGB(manual, df_t, train_size, horizon):
             opacity: 1;
         }
         </style>
-        <div class="chart-container">
+       
+    """ + f""" <div class="chart-container">
             <div class="tooltip">
                 <span class="help-icon">❓</span>
-                <span class="tooltiptext">The figure demonstrates the AR predictions of the model. In AR prediction, the model uses its own predictions to predict the next month</span>
+                <span class="tooltiptext">{helps.loc['AutoRegressive Prediction'].Description}</span>
             </div>
-        </div>
-    """, unsafe_allow_html=True)    
+        </div>""", unsafe_allow_html=True) 
     st.plotly_chart(fig_ar)
     # plt.figure()
     df_pred = pd.DataFrame({"Date":ticks, "Yhat":preds})
@@ -329,7 +331,9 @@ def to_jalali(row):
     d = jdatetime.date.fromgregorian(year=row.year, month=row.month, day=row.day)
     return f"{d.year}/{d.month}"
 
-def FBProphet(manual, df_t,test_size_manual, horizon):
+def FBProphet(manual, df_t,test_size_manual, horizon, helps):
+
+
     dg = df_t.copy()
     dg["ds"] = (dg["Year"].astype(str)+ "/"+dg["Month"].astype(str) + "/01").apply(to_georgian)
         
@@ -371,11 +375,8 @@ def FBProphet(manual, df_t,test_size_manual, horizon):
                     trials=trials)
     else:
         changepoint_prior_scale_manual=float(st.sidebar.text_input(label="Select changepoint_prior_scale", value=1,
-                                                                   help="""This parameter is the model's sensitivity to changepoints in the data.
-                                                                   A changepoint is a point in the data that the trend completely changes."""))
-        seasonality_prior_scale_manual=float(st.sidebar.text_input(label="Select seasonality_prior_scale", value=1,help="""
-                                                                   This parameter is the model's sensitivity to the seasonal component of the data. 
-                                                                   A seasonal component is a pattern that repeats over time in the data."""))
+                                                                   help=helps.loc["Select changepoint_prior_scale"].Description))
+        seasonality_prior_scale_manual=float(st.sidebar.text_input(label="Select seasonality_prior_scale", value=1,help=helps.loc["Select seasonality_prior_scale"].Description))
         best = {"changepoint_prior_scale":changepoint_prior_scale_manual,
                 "seasonality_prior_scale":seasonality_prior_scale_manual}
 
@@ -441,13 +442,13 @@ def FBProphet(manual, df_t,test_size_manual, horizon):
             opacity: 1;
         }
         </style>
-        <div class="chart-container">
+       
+    """ + f""" <div class="chart-container">
             <div class="tooltip">
                 <span class="help-icon">❓</span>
-                <span class="tooltiptext">The table depicts the hyper-parameters used for the model training.</span>
+                <span class="tooltiptext">{helps.loc['Parameter Table'].Description}</span>
             </div>
-        </div>
-    """, unsafe_allow_html=True)    
+        </div>""", unsafe_allow_html=True)    
     
 
     st.dataframe(best)
@@ -514,14 +515,13 @@ def FBProphet(manual, df_t,test_size_manual, horizon):
             opacity: 1;
         }
         </style>
-        <div class="chart-container">
+        
+    """ + f"""<div class="chart-container">
             <div class="tooltip">
                 <span class="help-icon">❓</span>
-                <span class="tooltiptext">The chart displays the model's prediction on the training and the test datasets. The dashed line demonstrates where the data was split.
-                You can change the parameters or the test size manually for improved performance.</span>
+                <span class="tooltiptext">{helps.loc['Tuned Model Predictions'].Description}</span>
             </div>
-        </div>
-    """, unsafe_allow_html=True)
+        </div>""", unsafe_allow_html=True)
 
     st.plotly_chart(fig_tuned)
 

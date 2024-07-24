@@ -34,9 +34,13 @@ st.write("""
          Hover your cursor on the ? if you want information on each component. Also, the documentation is available on [this Google doc](https://docs.google.com/document/d/1oMk5kQi6FAgqsGGXW-ksRVP8OyhvmnbUnxn0mpi5x2U/edit?usp=sharing). You can find a detailed guide of the app on [this doc](https://docs.google.com/document/d/1J3bzPC_u5nAXrmgdaiQtL9J35yV_dVR7XLDImyE_78Y/edit?usp=sharing)
          """)
 st.sidebar.write("Controls")
-file = st.sidebar.file_uploader("Upload Your Dataset", type=".csv",help="You can upload the data you want the model to be trained on")
+sheet_id = "1PNTC8IvqruHs3DWVX6HW30d2TCM6z3PCxtRMA_qep0M"
+sheet_name = "Sheet1"
+url = f'https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
+helps = pd.read_csv(url,index_col=0)
+file = st.sidebar.file_uploader("Upload Your Dataset", type=".csv",help=helps.loc["Upload Your Dataset"].Description)
 use_sample_data = st.sidebar.checkbox("Use Sample Data",
-                                      help="Check this if you do not want to upload a dataset and want to upload data and the model will be trained on the sample dataset")
+                                      help=helps.loc["Use Sample Data"].Description)
 
 # df = pd.read_csv("SalesData.csv") if file is None else pd.read_csv(file)
 try:
@@ -54,7 +58,7 @@ if got_data:
     df = df[["GenericName", "CompanyName", "Year", "Month","QtyAdadi"]]
     products = list(df.GenericName.unique())
     product = st.sidebar.selectbox(label="Please select a Generic", options=products,
-                                    help="Select the product you want the model to predict. Keep in mind that the model cannot be trained on a product with low data.")
+                                    help=helps.loc["Please Select A Product"].Description)
     df_t = df.query(f"GenericName == '{product}'").reset_index(drop=True)
     
    
@@ -77,17 +81,10 @@ if got_data:
         
         
     horizon = int(st.sidebar.slider(label="Select Prediction Horizon", min_value=2, max_value=30, value=5,
-                                    help="You can select how many months do you want the model to predict into the future."))
+                                    help=helps.loc["Select Prediction Horizon"].Description))
     test_size_manual = st.sidebar.number_input(label="Select Test Size", min_value=0, max_value=30, value=0,
-                                               help="""The data is divided into training and testing datasets, these datasets are used for tuning the model parameters.
-                                               Sometimes, the test data may suffer a trend change, which is not present in the train data.
-                                               For example, the trend is increasing or flat in the training data and it changes to a declining trend after the split.
-                                               Consequently, the model is not prepared for this change, which leads to poor predictions on the test data.
-                                               To mitigate this issue, you can change how many months are kept as test data. By default, the application keeps 10 months for testing
-                                               if the dataset has more than 20 months and 2 months for if the dataset has less than 20 months of data. The default values are selected if this input's value is zero.""")
-    manual = st.sidebar.checkbox("Manual Mode", help='''The model uses Bayesian optimization for hyper-parameter tuning.
-                                 This process is time consuming and sometimes, it may not find the optimal parameters.
-                                 By checking this box, you can bypass the automatic tuning and select the hyper-parameters manually.''')
+                                               help=helps.loc["Select Test Size"].Description)
+    manual = st.sidebar.checkbox("Manual Mode", help=helps.loc["Manual Mode"].Description)
     
 
     
@@ -97,9 +94,9 @@ if got_data:
     train_size = -5 if test_size_manual == 0 else -test_size_manual
     model_name = st.selectbox("select your model", options=["XGB", "Prophet"])
     if model_name == "XGB":
-        XGB(manual, df_t, train_size, horizon)
+        XGB(manual, df_t, train_size, horizon, helps)
     else:
-        FBProphet(manual, df_t,test_size_manual, horizon)
+        FBProphet(manual, df_t,test_size_manual, horizon, helps)
 
     # plt.plot(preds, label="prediction")
     # plt.savefig("ar_pred.jpg")
