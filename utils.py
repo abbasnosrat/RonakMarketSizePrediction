@@ -321,6 +321,7 @@ def XGB(manual, df_t, train_size, horizon, helps):
     "text/csv",
     key='download-csv', help="Download the data behind the chart above in CSV format."
     )
+    return df_pred, dg
 
 def to_georgian(date):
     date  = date.split("/")
@@ -615,3 +616,5 @@ def FBProphet(manual, df_t,test_size_manual, horizon, helps):
     "text/csv",
     key='download-csv', help="Download the data behind the chart above in CSV format."
     )
+    dg["ds"] = dg["ds"].apply(to_jalali)
+    return df_final, dg

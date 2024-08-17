@@ -90,14 +90,30 @@ if got_data:
     
 
 
-
     train_size = -5 if test_size_manual == 0 else -test_size_manual
     model_name = st.selectbox("select your model", options=["XGB", "Prophet"])
     if model_name == "XGB":
-        XGB(manual, df_t, train_size, horizon, helps)
+       df_final, dg =  XGB(manual, df_t, train_size, horizon, helps)
+       df_final["Year"] = df_final["Date"].apply(lambda d: d.split(("/"))[0])
+       df_final["Month"] = df_final["Date"].apply(lambda d: d.split(("/"))[1])
+       df_final = df_final.drop(columns="Date")
+       df_final = df_final.rename(columns={"Yhat":"y"})
+       total_df = pd.concat([dg, df_final[dg.columns]],axis=0)
     else:
-        FBProphet(manual, df_t,test_size_manual, horizon, helps)
+       df_final, dg =  FBProphet(manual, df_t,test_size_manual, horizon, helps)
+       df_final["Year"] = df_final["Date"].apply(lambda d: int(d.split(("/"))[0]))
+       df_final["Month"] = df_final["Date"].apply(lambda d: int(d.split(("/"))[1]))
+       df_final = df_final.drop(columns="Date")
+       df_final = df_final.rename(columns={"Yhat":"y"})
+       dg["Year"] = dg["ds"].apply(lambda d: int(d.split(("/"))[0]))
+       dg["Month"] = dg["ds"].apply(lambda d: int(d.split(("/"))[1]))
+       dg = dg.drop(columns="ds")
+       total_df = pd.concat([dg, df_final[dg.columns]],axis=0)
 
+    total_df = total_df.sort_values(["Year", "Month"])
+    agg_months = st.sidebar.number_input(label="Select Aggregation Months", help="Select how many months you want to be aggregated",value=12)
+
+    st.write(f'## Sum of sales for the selected period is {int(np.round(total_df.tail(agg_months)["y"].sum()))}')
     # plt.plot(preds, label="prediction")
     # plt.savefig("ar_pred.jpg")
 else:
