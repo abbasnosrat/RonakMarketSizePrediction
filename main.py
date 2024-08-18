@@ -98,7 +98,8 @@ if got_data:
        df_final["Month"] = df_final["Date"].apply(lambda d: d.split(("/"))[1])
        df_final = df_final.drop(columns="Date")
        df_final = df_final.rename(columns={"Yhat":"y"})
-       total_df = pd.concat([dg, df_final[dg.columns]],axis=0)
+       cols = ["Year", "Month", "y"]
+       total_df = pd.concat([dg[cols], df_final[cols]],axis=0)
     else:
        df_final, dg =  FBProphet(manual, df_t,test_size_manual, horizon, helps)
        df_final["Year"] = df_final["Date"].apply(lambda d: int(d.split(("/"))[0]))
@@ -108,7 +109,8 @@ if got_data:
        dg["Year"] = dg["ds"].apply(lambda d: int(d.split(("/"))[0]))
        dg["Month"] = dg["ds"].apply(lambda d: int(d.split(("/"))[1]))
        dg = dg.drop(columns="ds")
-       total_df = pd.concat([dg, df_final[dg.columns]],axis=0)
+       cols = ["Year", "Month", "y"]
+       total_df = pd.concat([dg[cols], df_final[cols]],axis=0)
 
     total_df = total_df.sort_values(["Year", "Month"])
     agg_months = st.sidebar.number_input(label="Select Aggregation Months", help="Select how many months you want to be aggregated",value=12)
