@@ -97,7 +97,7 @@ def ar_prediction(model:XGBRegressor, X_init:np.ndarray, horizon:int):
             lags = np.concatenate([lags[1:], np.array(pred).reshape(-1)])
             month += 1
             if month > 12:
-                month = 1
+                month = np.array([1]).reshape(1)
                 year += 1
                 
         return np.concatenate(Xs, axis=0), np.concatenate(preds).reshape(-1)
@@ -110,7 +110,7 @@ def ar_prediction(model:XGBRegressor, X_init:np.ndarray, horizon:int):
             preds.append(pred.copy())
             month += 1
             if month > 12:
-                month = 1
+                month = np.array([1]).reshape(1)
                 year += 1
         return np.concatenate(Xs, axis=0), np.concatenate(preds).reshape(-1)
 
